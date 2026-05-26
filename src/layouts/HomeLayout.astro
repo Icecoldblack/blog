@@ -31,7 +31,6 @@ const pageTitle = title === SITE_TITLE ? title : `${title} / ${SITE_TITLE}`;
     <Search />
     <Navbar />
 
-    <!-- Full-bleed main — no width constraint, sections manage their own layout -->
     <main id="home-main">
       <slot />
     </main>
@@ -59,5 +58,6 @@ const pageTitle = title === SITE_TITLE ? title : `${title} / ${SITE_TITLE}`;
   #home-main {
     width: 100%;
     min-height: 100vh;
+    padding-top: 3.5rem; /* account for fixed navbar */
   }
 </style>

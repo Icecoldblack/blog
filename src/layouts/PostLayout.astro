@@ -1,5 +1,5 @@
 ---
-import Layout from "./Layout.astro";
+import HomeLayout from "./HomeLayout.astro";
 import type { CollectionEntry } from "astro:content";
 
 interface Props {
@@ -15,51 +15,57 @@ const formattedDate = date.toLocaleDateString("en-US", {
 });
 ---
 
-<Layout title={title} description={description}>
-  <article>
-    <header class="post-header float-in">
-      <a
-        href="/"
-        class="back-link"
-        style="text-shadow: 0 0 8px rgba(147,51,234,0);"
-        onmouseover="this.style.color='rgba(255,255,255,1)';this.style.textShadow='0 0 12px rgba(147,51,234,1), 0 0 30px rgba(147,51,234,0.6), 0 0 60px rgba(147,51,234,0.25)';"
-        onmouseout="this.style.color='rgba(255,255,255,0.55)';this.style.textShadow='0 0 8px rgba(147,51,234,0)';"
-      >
-        ← all posts
-      </a>
+<HomeLayout title={title} description={description}>
+  <div class="post-wrap">
+    <article>
+      <header class="post-header float-in">
+        <a
+          href="/"
+          class="back-link"
+          style="text-shadow: 0 0 8px rgba(147,51,234,0);"
+          onmouseover="this.style.color='rgba(255,255,255,1)';this.style.textShadow='0 0 12px rgba(147,51,234,1), 0 0 30px rgba(147,51,234,0.6), 0 0 60px rgba(147,51,234,0.25)';"
+          onmouseout="this.style.color='rgba(255,255,255,0.45)';this.style.textShadow='0 0 8px rgba(147,51,234,0)';"
+        >
+          ← all posts
+        </a>
 
-      <div class="post-meta">
-        <time datetime={date.toISOString()}>{formattedDate.toLowerCase()}</time>
+        <div class="post-meta">
+          <time datetime={date.toISOString()}>{formattedDate.toLowerCase()}</time>
+        </div>
+
+        <h1 class="post-title">{title.toLowerCase()}</h1>
+
+        {description && <p class="post-desc">{description}</p>}
+      </header>
+
+      <div class="prose float-in">
+        <slot />
       </div>
-
-      <h1 class="post-title">{title.toLowerCase()}</h1>
-
-      {description && <p class="post-desc">{description}</p>}
-    </header>
-
-    <div class="prose float-in">
-      <slot />
-    </div>
-  </article>
-</Layout>
+    </article>
+  </div>
+</HomeLayout>
 
 <style>
-  article {
-    padding-top: 4rem;
+  /* ── Layout container ─────────────────────────────────────── */
+  .post-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 2rem 7rem;
   }
 
+  /* ── Post header ──────────────────────────────────────────── */
   .post-header {
-    margin-bottom: 4rem;
+    margin-bottom: 3.5rem;
     padding-bottom: 2.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   }
 
   .back-link {
     display: inline-block;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.45);
     text-decoration: none;
     margin-bottom: 2.5rem;
     transition: color 0.3s, text-shadow 0.3s;
@@ -67,10 +73,11 @@ const formattedDate = date.toLocaleDateString("en-US", {
 
   .post-meta {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.50);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.35);
     margin-bottom: 1rem;
+    text-transform: uppercase;
   }
 
   .post-title {
@@ -80,21 +87,143 @@ const formattedDate = date.toLocaleDateString("en-US", {
     font-weight: 700;
     letter-spacing: -0.02em;
     color: #ffffff;
-    line-height: 1.2;
-    margin-bottom: 1rem;
+    line-height: 1.15;
+    margin-bottom: 1.25rem;
   }
 
   .post-desc {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.65);
-    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.75;
     max-width: 52ch;
   }
 
+  /* ── Prose base ───────────────────────────────────────────── */
   .prose {
-    max-width: 68ch;
-    line-height: 1.8;
+    font-size: 0.9375rem;
+    line-height: 1.85;
+  }
+
+  /* Paragraphs */
+  .prose :global(p) {
+    margin-bottom: 1.6em;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  /* ── Images ───────────────────────────────────────────────── */
+  .prose :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+    margin: 2.25rem 0;
+  }
+
+  /* ── Tables ───────────────────────────────────────────────── */
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2.5rem 0;
+    font-size: 0.875rem;
+  }
+
+  .prose :global(thead) {
+    border: none;
+  }
+
+  .prose :global(thead th) {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.30);
+    padding: 0 2rem 0.85rem 0;
+    text-align: left;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    background: transparent;
+    vertical-align: bottom;
+  }
+
+  .prose :global(thead th:last-child) {
+    padding-right: 0;
+  }
+
+  .prose :global(tbody tr) {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .prose :global(tbody tr:last-child) {
+    border-bottom: none;
+  }
+
+  .prose :global(tbody td) {
+    padding: 0.75rem 2rem 0.75rem 0;
+    color: rgba(255, 255, 255, 0.58);
+    border: none;
+    background: transparent;
+    vertical-align: top;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  .prose :global(tbody td:last-child) {
+    padding-right: 0;
+  }
+
+  /* First column — name/label is brighter */
+  .prose :global(tbody td:first-child) {
+    color: rgba(255, 255, 255, 0.88);
+    font-weight: 500;
+  }
+
+  /* ── Blockquote ───────────────────────────────────────────── */
+  .prose :global(blockquote) {
+    border-left: 2px solid rgba(147, 51, 234, 0.35);
+    padding-left: 1.25rem;
+    margin: 2rem 0;
+    font-style: italic;
+  }
+
+  /* ── Code ─────────────────────────────────────────────────── */
+  .prose :global(pre) {
+    margin: 2rem 0;
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+  }
+
+  /* ── HR ───────────────────────────────────────────────────── */
+  .prose :global(hr) {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    margin: 3rem 0;
+  }
+
+  /* ── Responsive ───────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .post-wrap {
+      padding: 1.5rem 1.25rem 5rem;
+    }
+
+    .post-title {
+      font-size: clamp(1.5rem, 8vw, 2rem);
+    }
+
+    .prose :global(table) {
+      font-size: 0.8125rem;
+    }
+
+    .prose :global(thead th),
+    .prose :global(tbody td) {
+      padding-right: 1rem;
+    }
   }
 </style>
