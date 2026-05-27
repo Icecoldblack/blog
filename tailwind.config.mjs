@@ -8,6 +8,13 @@ export default {
         serif: ["'Noto Serif'",     "Georgia",    "'Times New Roman'", "serif"],
         mono:  ["'SF Mono'",        "Menlo",       "Monaco", "'Cascadia Code'", "'Fira Code'", "monospace"],
       },
+      colors: {
+        border: "rgba(255, 255, 255, 0.08)",
+        card: "rgba(255, 255, 255, 0.04)",
+        background: "#000000",
+        foreground: "rgba(255, 255, 255, 0.92)",
+        "muted-foreground": "rgba(255, 255, 255, 0.40)",
+      },
       typography: () => ({
         DEFAULT: {
           css: {

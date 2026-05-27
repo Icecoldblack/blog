@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import HomeLayout from "@/layouts/HomeLayout.astro";
 import PostCard from "@/components/PostCard.astro";
+import Spring2026RecapGallery from "@/components/Spring2026RecapGallery";
 
 const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -21,40 +22,8 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     </div>
   </section>
 
-  <!-- ── Magazine feature ──────────────────────────────────────── -->
-  <section class="page-section float-in">
-    <div class="container">
-      <header class="section-head">
-        <span class="section-label">spring 2026 recap</span>
-        <span class="section-meta">magazine</span>
-      </header>
-
-      <div id="magazine">
-        <div class="mag-carousel-wrap">
-          <button class="mag-prev" id="mag-prev" aria-label="Previous page">&#8249;</button>
-          <div class="mag-track" id="mag-track" role="region" aria-label="Spring 2026 recap magazine">
-            {[1,2,3,4,5,6,7,8].map((n) => (
-              <div class="mag-slide">
-                <img
-                  src={`/images/spring-2026/magazine/page-${n}.jpg`}
-                  alt={`spring 2026 recap, page ${n}`}
-                  loading={n === 1 ? "eager" : "lazy"}
-                  draggable="false"
-                  data-page={n}
-                />
-              </div>
-            ))}
-          </div>
-          <button class="mag-next" id="mag-next" aria-label="Next page">&#8250;</button>
-        </div>
-        <div class="mag-dots" id="mag-dots" aria-hidden="true">
-          {[1,2,3,4].map((n) => (
-            <button class={`mag-dot${n === 1 ? " active" : ""}`} data-index={n - 1} aria-label={`Go to page ${n}`} />
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- ── Magazine feature (3D circular gallery) ──────────────── -->
+  <Spring2026RecapGallery client:only="react" />
 
   <!-- ── Posts grid ────────────────────────────────────────────── -->
   <section class="page-section float-in">
@@ -73,12 +42,6 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
       )}
     </div>
   </section>
-
-  <!-- Lightbox — outside sections, fixed to viewport -->
-  <div id="mag-lightbox" aria-hidden="true" aria-modal="true" role="dialog">
-    <button id="mag-lb-close" aria-label="Close">&#10005;</button>
-    <img id="mag-lb-img" src="" alt="" />
-  </div>
 
 </HomeLayout>
 
@@ -182,127 +145,6 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     50% { opacity: 1; transform: scaleY(1.15); }
   }
 
-  /* ── Magazine carousel ───────────────────────────────────── */
-  #magazine {
-    margin-bottom: 0;
-  }
-
-  .mag-carousel-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .mag-prev, .mag-next {
-    flex: 0 0 auto;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 2.25rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0.5rem 0.4rem;
-    transition: color 0.2s;
-    user-select: none;
-  }
-
-  .mag-prev:hover, .mag-next:hover { color: rgba(255, 255, 255, 0.80); }
-
-  .mag-track {
-    flex: 1;
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    gap: 0.75rem;
-    scrollbar-width: none;
-    cursor: grab;
-  }
-
-  .mag-track::-webkit-scrollbar { display: none; }
-  .mag-track:active { cursor: grabbing; }
-
-  .mag-slide {
-    flex: 0 0 auto;
-    width: calc(50% - 0.375rem);
-    scroll-snap-align: start;
-    border-radius: 3px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.02);
-  }
-
-  .mag-slide img {
-    width: 100%;
-    height: auto;
-    display: block;
-    cursor: zoom-in;
-    user-select: none;
-  }
-
-  .mag-dots {
-    display: flex;
-    gap: 0.4rem;
-    justify-content: center;
-    margin-top: 1.25rem;
-  }
-
-  .mag-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.18);
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.2s, transform 0.2s;
-  }
-
-  .mag-dot.active {
-    background: rgba(255, 255, 255, 0.75);
-    transform: scale(1.35);
-  }
-
-  /* ── Lightbox ─────────────────────────────────────────────── */
-  #mag-lightbox {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    align-items: center;
-    justify-content: center;
-  }
-
-  #mag-lightbox.open { display: flex; }
-
-  #mag-lb-img {
-    max-width: 88vw;
-    max-height: 90vh;
-    object-fit: contain;
-    border-radius: 4px;
-    box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
-  }
-
-  #mag-lb-close {
-    position: fixed;
-    top: 1.25rem;
-    right: 1.5rem;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 1.25rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    transition: color 0.2s;
-    z-index: 1000;
-  }
-
-  #mag-lb-close:hover { color: #fff; }
-
   /* ── Posts grid ───────────────────────────────────────────── */
   .posts-grid {
     display: grid;
@@ -350,120 +192,8 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
       font-size: clamp(2.5rem, 12vw, 3.5rem);
     }
 
-    /* Show 1 magazine page at a time on mobile */
-    .mag-slide {
-      width: calc(88vw - 2rem);
-    }
-
     .page-section {
       padding: 3.5rem 0;
     }
-
-    .mag-prev, .mag-next {
-      font-size: 1.75rem;
-      padding: 0.5rem 0.25rem;
-    }
   }
 </style>
-
-<script>
-  const track    = document.getElementById("mag-track");
-  const dots     = document.querySelectorAll(".mag-dot");
-  const PAGES    = 4;
-  const PER_PAGE = 2;
-  let current    = 0;
-  let scrolling  = false;
-  let autoActive = false;
-  let autoTimer: ReturnType<typeof setTimeout> | null = null;
-  let idleTimer: ReturnType<typeof setTimeout> | null = null;
-
-  function goTo(page: number) {
-    const p = (page + PAGES) % PAGES;
-    const slide = track?.children[p * PER_PAGE] as HTMLElement | undefined;
-    if (!slide || !track) return;
-    scrolling = true;
-    track.scrollTo({ left: slide.offsetLeft, behavior: "smooth" });
-    dots.forEach((d, i) => d.classList.toggle("active", i === p));
-    current = p;
-    setTimeout(() => { scrolling = false; }, 700);
-  }
-
-  function scheduleNext() {
-    if (!autoActive) return;
-    autoTimer = setTimeout(() => {
-      if (!scrolling) goTo(current + 1);
-      scheduleNext();
-    }, 6000);
-  }
-
-  function startAuto() {
-    autoActive = true;
-    scheduleNext();
-  }
-
-  function stopAuto() {
-    autoActive = false;
-    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
-  }
-
-  function onManual() {
-    stopAuto();
-    if (idleTimer) clearTimeout(idleTimer);
-    idleTimer = setTimeout(startAuto, 10000);
-  }
-
-  dots.forEach((dot, i) => dot.addEventListener("click", () => { goTo(i); onManual(); }));
-
-  document.getElementById("mag-prev")?.addEventListener("click", () => { goTo(current - 1); onManual(); });
-  document.getElementById("mag-next")?.addEventListener("click", () => { goTo(current + 1); onManual(); });
-
-  document.addEventListener("keydown", (e: KeyboardEvent) => {
-    if (e.key === "ArrowRight") { goTo(current + 1); onManual(); }
-    if (e.key === "ArrowLeft")  { goTo(current - 1); onManual(); }
-    if (e.key === "Escape")     closeLightbox();
-  });
-
-  const lightbox = document.getElementById("mag-lightbox");
-  const lbImg    = document.getElementById("mag-lb-img") as HTMLImageElement | null;
-
-  function openLightbox(src: string, alt: string) {
-    if (!lightbox || !lbImg) return;
-    lbImg.src = src;
-    lbImg.alt = alt;
-    lightbox.classList.add("open");
-    lightbox.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeLightbox() {
-    lightbox?.classList.remove("open");
-    lightbox?.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  track?.querySelectorAll(".mag-slide img").forEach((img) => {
-    img.addEventListener("click", () => {
-      const el = img as HTMLImageElement;
-      openLightbox(el.src, el.alt);
-    });
-  });
-
-  document.getElementById("mag-lb-close")?.addEventListener("click", closeLightbox);
-  lightbox?.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
-
-  track?.addEventListener("pointerdown", () => onManual());
-  track?.addEventListener("touchstart",  () => onManual(), { passive: true });
-
-  track?.addEventListener("scroll", () => {
-    if (scrolling || !track) return;
-    const slideW = (track.children[0] as HTMLElement)?.offsetWidth + 12;
-    const page   = Math.min(Math.round(track.scrollLeft / slideW / PER_PAGE), PAGES - 1);
-    if (page !== current) {
-      dots.forEach((d, i) => d.classList.toggle("active", i === page));
-      current = page;
-      onManual();
-    }
-  }, { passive: true });
-
-  startAuto();
-</script>
