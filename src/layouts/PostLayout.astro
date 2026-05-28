@@ -12,6 +12,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
   year: "numeric",
   month: "long",
   day: "numeric",
+  timeZone: "UTC",
 });
 ---
 
@@ -110,6 +111,73 @@ const formattedDate = date.toLocaleDateString("en-US", {
   .prose :global(p) {
     margin-bottom: 1.6em;
     color: rgba(255, 255, 255, 0.62);
+  }
+
+  /* ── Headings ─────────────────────────────────────────────── */
+  .prose :global(h2) {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.30);
+    margin: 3rem 0 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .prose :global(h3) {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin: 2.25rem 0 0.85rem;
+  }
+
+  /* ── Lists ────────────────────────────────────────────────── */
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1.6em 0;
+    padding-left: 0;
+    list-style: none;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  .prose :global(ul li),
+  .prose :global(ol li) {
+    position: relative;
+    padding-left: 1.25rem;
+    margin-bottom: 0.55em;
+    line-height: 1.75;
+  }
+
+  .prose :global(ul li)::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: rgba(147, 51, 234, 0.55);
+    font-size: 0.8em;
+    top: 0.15em;
+  }
+
+  .prose :global(ol) {
+    counter-reset: list-counter;
+  }
+
+  .prose :global(ol li) {
+    counter-increment: list-counter;
+  }
+
+  .prose :global(ol li)::before {
+    content: counter(list-counter) '.';
+    position: absolute;
+    left: 0;
+    color: rgba(147, 51, 234, 0.55);
+    font-size: 0.8em;
+    font-weight: 600;
+    top: 0.15em;
   }
 
   /* ── Images ───────────────────────────────────────────────── */

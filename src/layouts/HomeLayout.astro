@@ -47,7 +47,7 @@ const pageTitle = title === SITE_TITLE ? title : `${title} / ${SITE_TITLE}`;
             }
           });
         },
-        { threshold: 0.15 }
+        { threshold: 0, rootMargin: "0px 0px -60px 0px" }
       );
       document.querySelectorAll(".float-in").forEach((el) => observer.observe(el));
     </script>

@@ -6,7 +6,7 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).map((p) 
   title: p.data.title,
   description: p.data.description,
   tags: p.data.tags,
-  date: p.data.date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+  date: p.data.date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }),
 }));
 ---
 
