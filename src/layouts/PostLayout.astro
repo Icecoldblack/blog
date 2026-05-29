@@ -4,10 +4,12 @@ import type { CollectionEntry } from "astro:content";
 
 interface Props {
   post: CollectionEntry<"posts">;
+  prev?: CollectionEntry<"posts"> | null;
+  next?: CollectionEntry<"posts"> | null;
 }
 
-const { post } = Astro.props;
-const { title, date, description } = post.data;
+const { post, prev = null, next = null } = Astro.props;
+const { title, date, description, season, tags, accent = "purple" } = post.data;
 const formattedDate = date.toLocaleDateString("en-US", {
   year: "numeric",
   month: "long",
@@ -17,41 +19,76 @@ const formattedDate = date.toLocaleDateString("en-US", {
 ---
 
 <HomeLayout title={title} description={description}>
-  <div class="post-wrap">
+  <div class="post-wrap" data-accent={accent}>
     <article>
       <header class="post-header float-in">
-        <a
-          href="/"
-          class="back-link"
-          style="text-shadow: 0 0 8px rgba(147,51,234,0);"
-          onmouseover="this.style.color='rgba(255,255,255,1)';this.style.textShadow='0 0 12px rgba(147,51,234,1), 0 0 30px rgba(147,51,234,0.6), 0 0 60px rgba(147,51,234,0.25)';"
-          onmouseout="this.style.color='rgba(255,255,255,0.45)';this.style.textShadow='0 0 8px rgba(147,51,234,0)';"
-        >
-          ← all posts
-        </a>
+        <a href="/" class="back-link">← all posts</a>
 
         <div class="post-meta">
+          {season && <span class="post-kicker">{season}</span>}
           <time datetime={date.toISOString()}>{formattedDate.toLowerCase()}</time>
         </div>
 
-        <h1 class="post-title">{title.toLowerCase()}</h1>
+        <h1 class="post-title">{title}</h1>
 
         {description && <p class="post-desc">{description}</p>}
+
+        {tags && tags.length > 0 && (
+          <ul class="tag-row">
+            {tags.map((t) => <li>{t}</li>)}
+          </ul>
+        )}
       </header>
 
       <div class="prose float-in">
         <slot />
       </div>
+
+      {(prev || next) && (
+        <nav class="post-nav float-in" aria-label="Article navigation">
+          {prev ? (
+            <a class="nav-link prev" href={`/posts/${prev.slug}`} data-nav="prev" rel="prev">
+              <span class="nav-dir">← previous</span>
+              <span class="nav-title">{prev.data.title}</span>
+            </a>
+          ) : <span class="nav-spacer" />}
+
+          {next ? (
+            <a class="nav-link next" href={`/posts/${next.slug}`} data-nav="next" rel="next">
+              <span class="nav-dir">next →</span>
+              <span class="nav-title">{next.data.title}</span>
+            </a>
+          ) : <span class="nav-spacer" />}
+        </nav>
+      )}
     </article>
   </div>
+
+  <script>
+    const prev = document.querySelector<HTMLAnchorElement>('a[data-nav="prev"]');
+    const next = document.querySelector<HTMLAnchorElement>('a[data-nav="next"]');
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'ArrowLeft' && prev) { e.preventDefault(); prev.click(); }
+      if (e.key === 'ArrowRight' && next) { e.preventDefault(); next.click(); }
+    };
+    document.addEventListener('keydown', onKey);
+  </script>
 </HomeLayout>
 
 <style>
-  /* ── Layout container ─────────────────────────────────────── */
+  /* ── Accent token ─────────────────────────────────────────── */
   .post-wrap {
+    --accent: 147, 51, 234; /* purple default */
     max-width: 680px;
     margin: 0 auto;
     padding: 2rem 2rem 7rem;
+  }
+
+  .post-wrap[data-accent='gold'] {
+    --accent: 212, 175, 55; /* casino gold */
   }
 
   /* ── Post header ──────────────────────────────────────────── */
@@ -64,21 +101,38 @@ const formattedDate = date.toLocaleDateString("en-US", {
   .back-link {
     display: inline-block;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.40);
     text-decoration: none;
     margin-bottom: 2.5rem;
-    transition: color 0.3s, text-shadow 0.3s;
+    transition: color 0.25s, letter-spacing 0.25s;
+  }
+
+  .back-link:hover {
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.2em;
   }
 
   .post-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 0.62rem;
     letter-spacing: 0.14em;
     color: rgba(255, 255, 255, 0.35);
-    margin-bottom: 1rem;
+    margin-bottom: 1.1rem;
     text-transform: uppercase;
+  }
+
+  .post-kicker {
+    color: rgb(var(--accent));
+    font-weight: 700;
+    padding-right: 0.75rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   .post-title {
@@ -92,13 +146,43 @@ const formattedDate = date.toLocaleDateString("en-US", {
     margin-bottom: 1.25rem;
   }
 
+  /* Gold posts get a metallic title */
+  .post-wrap[data-accent='gold'] .post-title {
+    background: linear-gradient(100deg, #f4e4a8 0%, #d4af37 38%, #fff6d0 55%, #c9962b 78%, #e8cf7a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
   .post-desc {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 0.9rem;
+    font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 1.05rem;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.55);
-    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.7;
     max-width: 52ch;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 1.75rem 0 0;
+    padding: 0;
+  }
+
+  .tag-row li {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
   }
 
   /* ── Prose base ───────────────────────────────────────────── */
@@ -107,10 +191,18 @@ const formattedDate = date.toLocaleDateString("en-US", {
     line-height: 1.85;
   }
 
-  /* Paragraphs */
   .prose :global(p) {
     margin-bottom: 1.6em;
     color: rgba(255, 255, 255, 0.62);
+  }
+
+  /* Lede - opening paragraph helper */
+  .prose :global(.lede) {
+    font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+    font-size: 1.2rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 2rem;
   }
 
   /* ── Headings ─────────────────────────────────────────────── */
@@ -140,44 +232,21 @@ const formattedDate = date.toLocaleDateString("en-US", {
   .prose :global(ul),
   .prose :global(ol) {
     margin: 0 0 1.6em 0;
-    padding-left: 0;
-    list-style: none;
+    padding-left: 1.25rem;
     color: rgba(255, 255, 255, 0.62);
   }
 
+  .prose :global(ul) { list-style: disc; }
+  .prose :global(ol) { list-style: decimal; }
+
   .prose :global(ul li),
   .prose :global(ol li) {
-    position: relative;
-    padding-left: 1.25rem;
     margin-bottom: 0.55em;
     line-height: 1.75;
   }
 
-  .prose :global(ul li)::before {
-    content: '—';
-    position: absolute;
-    left: 0;
-    color: rgba(147, 51, 234, 0.55);
-    font-size: 0.8em;
-    top: 0.15em;
-  }
-
-  .prose :global(ol) {
-    counter-reset: list-counter;
-  }
-
-  .prose :global(ol li) {
-    counter-increment: list-counter;
-  }
-
-  .prose :global(ol li)::before {
-    content: counter(list-counter) '.';
-    position: absolute;
-    left: 0;
-    color: rgba(147, 51, 234, 0.55);
-    font-size: 0.8em;
-    font-weight: 600;
-    top: 0.15em;
+  .prose :global(li::marker) {
+    color: rgba(255, 255, 255, 0.3);
   }
 
   /* ── Images ───────────────────────────────────────────────── */
@@ -185,8 +254,262 @@ const formattedDate = date.toLocaleDateString("en-US", {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 4px;
+    border-radius: 6px;
     margin: 2.25rem 0;
+  }
+
+  /* ── Figure with caption ──────────────────────────────────── */
+  .prose :global(figure) {
+    margin: 2.5rem 0;
+  }
+
+  .prose :global(figure img) {
+    margin: 0;
+  }
+
+  .prose :global(figcaption) {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.32);
+    margin-top: 0.65rem;
+    text-align: center;
+  }
+
+  /* ── Stat band ────────────────────────────────────────────── */
+  .prose :global(.statband) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 2.5rem 0;
+  }
+
+  .prose :global(.statband .stat) {
+    background: #000;
+    padding: 1.5rem 1rem;
+    text-align: center;
+  }
+
+  .prose :global(.statband .stat .num) {
+    display: block;
+    font-family: 'Noto Serif', Georgia, serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    line-height: 1;
+    color: rgb(var(--accent));
+    margin-bottom: 0.45rem;
+  }
+
+  .prose :global(.statband .stat .lbl) {
+    display: block;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.40);
+    line-height: 1.4;
+  }
+
+  /* ── Pull quote ───────────────────────────────────────────── */
+  .prose :global(.pull) {
+    font-family: 'Noto Serif', Georgia, serif;
+    font-style: italic;
+    font-size: clamp(1.3rem, 4vw, 1.7rem);
+    line-height: 1.4;
+    color: #fff;
+    text-align: center;
+    margin: 3rem 0;
+    padding: 0 1rem;
+    position: relative;
+  }
+
+  .prose :global(.pull.small) {
+    font-size: clamp(1.05rem, 2.8vw, 1.3rem);
+  }
+
+  .prose :global(.pull)::before {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 2px;
+    background: rgb(var(--accent));
+    margin: 0 auto 1.5rem;
+  }
+
+  .prose :global(.pull cite) {
+    display: block;
+    margin-top: 1rem;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-style: normal;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.40);
+  }
+
+  /* ── Galleries ────────────────────────────────────────────── */
+  .prose :global(.gallery) {
+    display: grid;
+    gap: 0.6rem;
+    margin: 2.25rem 0;
+  }
+
+  .prose :global(.gallery-2) { grid-template-columns: repeat(2, 1fr); }
+  .prose :global(.gallery-3) { grid-template-columns: repeat(3, 1fr); }
+
+  .prose :global(.gallery img) {
+    margin: 0;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 4 / 3;
+  }
+
+  .prose :global(.gallery.tall img) { aspect-ratio: 3 / 4; }
+
+  /* ── Avatar row (people) ──────────────────────────────────── */
+  .prose :global(.avatars) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    justify-content: center;
+    margin: 2rem 0;
+  }
+
+  .prose :global(.avatars figure) {
+    margin: 0;
+    width: 104px;
+    text-align: center;
+  }
+
+  .prose :global(.avatars img) {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .prose :global(.avatars figcaption) {
+    margin-top: 0.6rem;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .prose :global(.avatars figcaption span) {
+    display: block;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 0.2rem;
+  }
+
+  /* ── Cards (winners / highlights) ─────────────────────────── */
+  .prose :global(.card) {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-left: 2px solid rgb(var(--accent));
+    border-radius: 6px;
+    padding: 1.4rem 1.5rem;
+    margin: 1rem 0;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .prose :global(.card .card-tag) {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(var(--accent));
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .prose :global(.card h4) {
+    font-family: 'Noto Serif', Georgia, serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #fff;
+    margin: 0 0 0.35rem;
+  }
+
+  .prose :global(.card p) {
+    margin: 0;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* ── Sponsor wall ─────────────────────────────────────────── */
+  .prose :global(.sponsorwall) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.75rem 2.25rem;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem 0;
+    padding: 2rem 1.5rem;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+  }
+
+  .prose :global(.sponsorwall img) {
+    height: 30px;
+    width: auto;
+    margin: 0;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    opacity: 0.55;
+    transition: opacity 0.25s;
+  }
+
+  .prose :global(.sponsorwall img:hover) { opacity: 0.95; }
+
+  /* ── Closing CTA ──────────────────────────────────────────── */
+  .prose :global(.cta) {
+    text-align: center;
+    margin: 3.5rem 0 1rem;
+    padding: 2.5rem 1.5rem;
+    border: 1px solid rgba(var(--accent), 0.35);
+    border-radius: 10px;
+    background: radial-gradient(120% 120% at 50% 0%, rgba(var(--accent), 0.08), transparent 70%);
+  }
+
+  .prose :global(.cta p) {
+    font-family: 'Noto Serif', Georgia, serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: #fff;
+    margin: 0 0 1.25rem;
+  }
+
+  .prose :global(.cta a) {
+    display: inline-block;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #fff;
+    padding: 0.7rem 1.5rem;
+    border: 1px solid rgb(var(--accent));
+    border-radius: 999px;
+    transition: background 0.25s, color 0.25s;
+  }
+
+  .prose :global(.cta a:hover) {
+    background: rgb(var(--accent));
+    color: #000;
   }
 
   /* ── Tables ───────────────────────────────────────────────── */
@@ -197,9 +520,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
     font-size: 0.875rem;
   }
 
-  .prose :global(thead) {
-    border: none;
-  }
+  .prose :global(thead) { border: none; }
 
   .prose :global(thead th) {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -210,28 +531,20 @@ const formattedDate = date.toLocaleDateString("en-US", {
     color: rgba(255, 255, 255, 0.30);
     padding: 0 2rem 0.85rem 0;
     text-align: left;
-    border-top: none;
-    border-left: none;
-    border-right: none;
+    border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.10);
     background: transparent;
     vertical-align: bottom;
   }
 
-  .prose :global(thead th:last-child) {
-    padding-right: 0;
-  }
+  .prose :global(thead th:last-child) { padding-right: 0; }
 
   .prose :global(tbody tr) {
-    border-top: none;
-    border-left: none;
-    border-right: none;
+    border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .prose :global(tbody tr:last-child) {
-    border-bottom: none;
-  }
+  .prose :global(tbody tr:last-child) { border-bottom: none; }
 
   .prose :global(tbody td) {
     padding: 0.75rem 2rem 0.75rem 0;
@@ -242,11 +555,8 @@ const formattedDate = date.toLocaleDateString("en-US", {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 
-  .prose :global(tbody td:last-child) {
-    padding-right: 0;
-  }
+  .prose :global(tbody td:last-child) { padding-right: 0; }
 
-  /* First column — name/label is brighter */
   .prose :global(tbody td:first-child) {
     color: rgba(255, 255, 255, 0.88);
     font-weight: 500;
@@ -254,7 +564,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
 
   /* ── Blockquote ───────────────────────────────────────────── */
   .prose :global(blockquote) {
-    border-left: 2px solid rgba(147, 51, 234, 0.35);
+    border-left: 2px solid rgba(var(--accent), 0.45);
     padding-left: 1.25rem;
     margin: 2rem 0;
     font-style: italic;
@@ -268,6 +578,65 @@ const formattedDate = date.toLocaleDateString("en-US", {
     overflow-x: auto;
   }
 
+  /* ── Article-to-article nav ───────────────────────────────── */
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .post-nav .nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.25rem 1.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    text-decoration: none;
+    background: transparent;
+    transition: border-color 0.25s, background 0.25s, transform 0.25s;
+  }
+
+  .post-nav .nav-link:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .post-nav .nav-link.prev:hover { transform: translateX(-3px); }
+  .post-nav .nav-link.next:hover { transform: translateX(3px); }
+
+  .post-nav .nav-link.next {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .post-nav .nav-dir {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.40);
+  }
+
+  .post-nav .nav-link:hover .nav-dir {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .post-nav .nav-title {
+    font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .post-nav .nav-spacer { display: block; }
+
   /* ── HR ───────────────────────────────────────────────────── */
   .prose :global(hr) {
     border: none;
@@ -277,21 +646,25 @@ const formattedDate = date.toLocaleDateString("en-US", {
 
   /* ── Responsive ───────────────────────────────────────────── */
   @media (max-width: 600px) {
-    .post-wrap {
-      padding: 1.5rem 1.25rem 5rem;
-    }
+    .post-wrap { padding: 1.5rem 1.25rem 5rem; }
 
-    .post-title {
-      font-size: clamp(1.5rem, 8vw, 2rem);
-    }
+    .post-title { font-size: clamp(1.5rem, 8vw, 2rem); }
 
-    .prose :global(table) {
-      font-size: 0.8125rem;
-    }
+    .prose :global(table) { font-size: 0.8125rem; }
 
     .prose :global(thead th),
-    .prose :global(tbody td) {
-      padding-right: 1rem;
+    .prose :global(tbody td) { padding-right: 1rem; }
+
+    .prose :global(.gallery-3) { grid-template-columns: repeat(2, 1fr); }
+
+    .post-nav {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .post-nav .nav-link.next {
+      text-align: left;
+      align-items: flex-start;
     }
   }
 </style>

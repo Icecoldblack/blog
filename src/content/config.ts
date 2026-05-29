@@ -10,6 +10,7 @@ const posts = defineCollection({
     description: z.string(),
     draft: z.boolean().default(false),
     season: z.string().optional(),
+    accent: z.enum(["purple", "gold"]).optional(),
   }),
 });
 
