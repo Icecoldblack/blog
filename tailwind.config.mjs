@@ -5,7 +5,7 @@ export default {
     extend: {
       fontFamily: {
         sans:  ["'Helvetica Neue'", "'Helvetica'", "'Arial'", "sans-serif"],
-        serif: ["'Noto Serif'",     "Georgia",    "'Times New Roman'", "serif"],
+        serif: ["'Helvetica Neue'", "'Helvetica'", "'Arial'", "sans-serif"],
         mono:  ["'SF Mono'",        "Menlo",       "Monaco", "'Cascadia Code'", "'Fira Code'", "monospace"],
       },
       colors: {
@@ -24,7 +24,7 @@ export default {
             maxWidth: "none",
             lineHeight: "1.75",
             "h1, h2, h3, h4, h5, h6": {
-              fontFamily: "'Noto Serif', Georgia, 'Times New Roman', serif",
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               color: "rgba(255,255,255,1)",
               fontWeight: "700",
               fontStyle: "italic",
@@ -38,7 +38,7 @@ export default {
             },
             code: {
               fontFamily: "'SF Mono', Menlo, Monaco, monospace",
-              color: "rgba(216,180,254,0.9)",
+              color: "rgba(186,198,224,0.92)",
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
               padding: "0.1em 0.4em",
@@ -62,7 +62,7 @@ export default {
             },
             strong:     { color: "rgba(255,255,255,0.95)" },
             blockquote: {
-              borderLeftColor: "rgba(147,51,234,0.4)",
+              borderLeftColor: "rgba(122,140,178,0.45)",
               color:           "rgba(255,255,255,0.50)",
               fontStyle:       "italic",
             },

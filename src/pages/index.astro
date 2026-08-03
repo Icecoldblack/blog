@@ -14,11 +14,8 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
   <!-- ── Hero ──────────────────────────────────────────────────── -->
   <section class="hero">
     <div class="hero-inner float-in">
-      <h1 class="hero-title glow-pulse-title">progsu / blog</h1>
+      <h1 class="hero-title display">progsu / blog</h1>
       <p class="hero-sub">stories, events & ideas from georgia state's programming community</p>
-    </div>
-    <div class="hero-scroll-cue float-in" aria-hidden="true">
-      <span class="scroll-line"></span>
     </div>
   </section>
 
@@ -102,7 +99,7 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
   }
 
   .hero-title {
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-weight: 700;
     font-size: clamp(3rem, 8vw, 5.5rem);
@@ -121,28 +118,6 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
     letter-spacing: 0.02em;
     max-width: 38ch;
     margin: 0 auto;
-  }
-
-  .hero-scroll-cue {
-    position: absolute;
-    bottom: 2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .scroll-line {
-    width: 1px;
-    height: 3rem;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.20), rgba(255,255,255,0));
-    animation: scrollPulse 2s ease-in-out infinite;
-  }
-
-  @keyframes scrollPulse {
-    0%, 100% { opacity: 0.4; transform: scaleY(1); }
-    50% { opacity: 1; transform: scaleY(1.15); }
   }
 
   /* ── Posts grid ───────────────────────────────────────────── */

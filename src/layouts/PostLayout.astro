@@ -76,12 +76,60 @@ const formattedDate = date.toLocaleDateString("en-US", {
     };
     document.addEventListener('keydown', onKey);
   </script>
+
+  <script>
+    // Count-up animation for stat-band numbers when scrolled into view.
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const nums = Array.from(document.querySelectorAll<HTMLElement>('.statband .num'));
+
+    nums.forEach((el) => {
+      const raw = el.textContent?.trim() ?? '';
+      const match = raw.match(/^(\D*)(\d[\d,]*)(.*)$/);
+      // Skip non-numeric stats (e.g. "All", "1st" keeps its suffix).
+      if (!match) return;
+      el.dataset.prefix = match[1];
+      el.dataset.target = match[2].replace(/,/g, '');
+      el.dataset.suffix = match[3];
+      if (!reduce) el.textContent = match[1] + '0' + match[3];
+    });
+
+    const animate = (el: HTMLElement) => {
+      const target = Number(el.dataset.target ?? '0');
+      const prefix = el.dataset.prefix ?? '';
+      const suffix = el.dataset.suffix ?? '';
+      const dur = 1100;
+      const start = performance.now();
+      const tick = (now: number) => {
+        const t = Math.min(1, (now - start) / dur);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = prefix + Math.round(target * eased).toLocaleString() + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    if (!reduce && nums.length) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              animate(entry.target as HTMLElement);
+              io.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.6 },
+      );
+      nums.forEach((el) => { if (el.dataset.target) io.observe(el); });
+    }
+  </script>
 </HomeLayout>
 
 <style>
   /* ── Accent token ─────────────────────────────────────────── */
   .post-wrap {
-    --accent: 147, 51, 234; /* purple default */
+    --accent: 122, 140, 178; /* restrained steel-blue default */
     max-width: 680px;
     margin: 0 auto;
     padding: 2rem 2rem 7rem;
@@ -136,7 +184,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
   }
 
   .post-title {
-    font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-size: clamp(1.75rem, 5vw, 2.75rem);
     font-weight: 700;
@@ -146,17 +194,13 @@ const formattedDate = date.toLocaleDateString("en-US", {
     margin-bottom: 1.25rem;
   }
 
-  /* Gold posts get a metallic title */
+  /* Gold posts get a solid gold title */
   .post-wrap[data-accent='gold'] .post-title {
-    background: linear-gradient(100deg, #f4e4a8 0%, #d4af37 38%, #fff6d0 55%, #c9962b 78%, #e8cf7a 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    color: #d4af37;
   }
 
   .post-desc {
-    font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-size: 1.05rem;
     font-weight: 400;
@@ -198,7 +242,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
 
   /* Lede - opening paragraph helper */
   .prose :global(.lede) {
-    font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 1.2rem;
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.82);
@@ -208,24 +252,21 @@ const formattedDate = date.toLocaleDateString("en-US", {
   /* ── Headings ─────────────────────────────────────────────── */
   .prose :global(h2) {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.30);
-    margin: 3rem 0 1.25rem;
-    padding-bottom: 0.6rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.3;
+    margin: 3.25rem 0 1rem;
   }
 
   .prose :global(h3) {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 0.7rem;
+    font-size: 1.05rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.45);
-    margin: 2.25rem 0 0.85rem;
+    letter-spacing: -0.005em;
+    color: rgba(255, 255, 255, 0.82);
+    margin: 2.25rem 0 0.75rem;
   }
 
   /* ── Lists ────────────────────────────────────────────────── */
@@ -251,11 +292,14 @@ const formattedDate = date.toLocaleDateString("en-US", {
 
   /* ── Images ───────────────────────────────────────────────── */
   .prose :global(img) {
-    width: 100%;
+    max-width: 100%;
     height: auto;
+    /* Cap vertical phone photos so a portrait shot never dominates the page.
+       Landscape images still fill the column; tall ones shrink and center. */
+    max-height: 72vh;
     display: block;
     border-radius: 6px;
-    margin: 2.25rem 0;
+    margin: 2.25rem auto;
   }
 
   /* ── Figure with caption ──────────────────────────────────── */
@@ -297,7 +341,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
 
   .prose :global(.statband .stat .num) {
     display: block;
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-weight: 700;
     font-size: clamp(1.6rem, 5vw, 2.2rem);
@@ -318,7 +362,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
 
   /* ── Pull quote ───────────────────────────────────────────── */
   .prose :global(.pull) {
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-size: clamp(1.3rem, 4vw, 1.7rem);
     line-height: 1.4;
@@ -384,13 +428,13 @@ const formattedDate = date.toLocaleDateString("en-US", {
 
   .prose :global(.avatars figure) {
     margin: 0;
-    width: 104px;
+    width: 140px;
     text-align: center;
   }
 
   .prose :global(.avatars img) {
-    width: 96px;
-    height: 96px;
+    width: 128px;
+    height: 128px;
     border-radius: 50%;
     object-fit: cover;
     margin: 0 auto;
@@ -435,7 +479,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
   }
 
   .prose :global(.card h4) {
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-weight: 700;
     font-size: 1.15rem;
@@ -447,6 +491,79 @@ const formattedDate = date.toLocaleDateString("en-US", {
     margin: 0;
     font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* ── Winners (co-first-place) ─────────────────────────────── */
+  .prose :global(.winners) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1.75rem 0;
+  }
+
+  .prose :global(.winner) {
+    position: relative;
+    border: 1px solid rgba(var(--accent), 0.45);
+    border-radius: 10px;
+    padding: 1.6rem 1.6rem 1.5rem;
+    background:
+      radial-gradient(120% 140% at 0% 0%, rgba(var(--accent), 0.10), transparent 55%),
+      rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+  }
+
+  .prose :global(.winner .rank) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(var(--accent));
+    margin-bottom: 0.7rem;
+  }
+
+  .prose :global(.winner .rank::before) {
+    content: '';
+    display: inline-block;
+    width: 1.4rem;
+    height: 1px;
+    background: rgb(var(--accent));
+  }
+
+  .prose :global(.winner h4) {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(1.35rem, 3.5vw, 1.7rem);
+    letter-spacing: -0.01em;
+    color: #fff;
+    margin: 0 0 0.2rem;
+  }
+
+  .prose :global(.winner .by) {
+    display: block;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.40);
+    margin-bottom: 0.85rem;
+  }
+
+  .prose :global(.winner p) {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.60);
+  }
+
+  /* ── Gold-post stat band gets a subtle frame ──────────────── */
+  .post-wrap[data-accent='gold'] .prose :global(.statband),
+  .post-wrap[data-accent='gold'] :global(.statband) {
+    border-color: rgba(var(--accent), 0.28);
   }
 
   /* ── Sponsor wall ─────────────────────────────────────────── */
@@ -473,6 +590,11 @@ const formattedDate = date.toLocaleDateString("en-US", {
     transition: opacity 0.25s;
   }
 
+  /* Compact / boxed logos need more height to optically match the wide wordmarks */
+  .prose :global(.sponsorwall img[alt="Major League Hacking"]) {
+    height: 48px;
+  }
+
   .prose :global(.sponsorwall img:hover) { opacity: 0.95; }
 
   /* ── Closing CTA ──────────────────────────────────────────── */
@@ -486,7 +608,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
   }
 
   .prose :global(.cta p) {
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-size: 1.2rem;
     color: #fff;
@@ -627,7 +749,7 @@ const formattedDate = date.toLocaleDateString("en-US", {
   }
 
   .post-nav .nav-title {
-    font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-weight: 700;
     font-size: 0.95rem;
@@ -656,6 +778,8 @@ const formattedDate = date.toLocaleDateString("en-US", {
     .prose :global(tbody td) { padding-right: 1rem; }
 
     .prose :global(.gallery-3) { grid-template-columns: repeat(2, 1fr); }
+
+    .prose :global(.winners) { grid-template-columns: 1fr; }
 
     .post-nav {
       grid-template-columns: 1fr;

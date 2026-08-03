@@ -5,10 +5,14 @@
 /* ── Base reset ─────────────────────────────────────────────── */
 @layer base {
   :root {
+    /* One typeface site-wide. Bold-italic is reserved for display
+       (titles, headings) via the .display helper. Body stays regular. */
     --font-sans:  'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-    --font-serif: 'Noto Serif', Georgia, 'Times New Roman', serif;
-    --font-mono:  'SF Mono', Menlo, Monaco, 'Cascadia Code', 'Fira Code', monospace;
-    --purple:     rgb(147, 51, 234);
+    --font-serif: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    --font-mono:  'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    /* Restrained accent (was neon purple) */
+    --accent:     122, 140, 178;
+    --accent-rgb: rgb(122, 140, 178);
   }
 
   *, *::before, *::after {
@@ -16,6 +20,13 @@
     margin: 0;
     padding: 0;
     font-family: var(--font-sans);
+  }
+
+  /* Display helper: the only place bold + italic lives */
+  .display {
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: -0.02em;
   }
 
   html {
@@ -44,7 +55,7 @@
   }
 
   :focus-visible {
-    outline: 1px solid rgba(147, 51, 234, 0.6);
+    outline: 1px solid rgba(var(--accent), 0.6);
     outline-offset: 3px;
   }
 
@@ -55,51 +66,25 @@
   ::-webkit-scrollbar-thumb:hover { background: #555555; }
 }
 
-/* ── Float-in scroll reveal ─────────────────────────────────── */
+/* ── Fade-in scroll reveal ──────────────────────────────────── */
 .float-in {
   opacity: 0;
-  transform: translateY(40px);
-  filter: blur(10px);
+  transform: translateY(12px);
   transition:
-    opacity   0.9s ease-out,
-    transform 0.9s ease-out,
-    filter    0.9s ease-out;
+    opacity   0.6s ease-out,
+    transform 0.6s ease-out;
 }
 .float-in.visible {
   opacity: 1;
   transform: translateY(0);
-  filter: blur(0);
 }
 
-/* ── Hero wordmark pulse ─────────────────────────────────────── */
-.glow-pulse-title {
-  color: #fff;
-  text-shadow:
-    0 0 6px  rgba(59, 130, 246, 0.18),
-    0 0 12px rgba(255, 255, 255, 0.10),
-    0 0 24px rgba(59, 130, 246, 0.08);
-  animation: titlePulse 2.5s ease-in-out infinite;
-}
-
-@keyframes titlePulse {
-  0%, 100% {
-    text-shadow:
-      0 0 6px  rgba(59, 130, 246, 0.18),
-      0 0 12px rgba(255, 255, 255, 0.10),
-      0 0 24px rgba(59, 130, 246, 0.08);
+@media (prefers-reduced-motion: reduce) {
+  .float-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
-  50% {
-    text-shadow:
-      0 0 8px  rgba(59, 130, 246, 0.28),
-      0 0 18px rgba(255, 255, 255, 0.16),
-      0 0 36px rgba(59, 130, 246, 0.14);
-  }
-}
-
-/* ── Glitch char hover ──────────────────────────────────────── */
-.glitch-char {
-  display: inline-block;
-  cursor: default;
 }
 
 /* ── Search overlay ─────────────────────────────────────────── */
@@ -139,7 +124,7 @@
 }
 #search-prompt {
   font-size: 0.75rem;
-  color: rgba(147, 51, 234, 0.5);
+  color: rgba(var(--accent), 0.6);
   flex-shrink: 0;
   font-family: var(--font-sans);
 }
@@ -152,7 +137,7 @@
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.85);
   letter-spacing: 0.02em;
-  caret-color: rgba(147, 51, 234, 0.8);
+  caret-color: rgba(var(--accent), 0.85);
 }
 #search-input::placeholder {
   color: rgba(255, 255, 255, 0.20);

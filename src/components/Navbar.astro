@@ -6,26 +6,12 @@ import { NAV_LINKS } from "@/consts";
   <div class="header-inner">
 
     <!-- Wordmark -->
-    <a
-      href="/"
-      class="wordmark"
-      style="text-shadow: 0 0 8px rgba(147,51,234,0);"
-      onmouseover="this.style.textShadow='0 0 12px rgba(147,51,234,1), 0 0 30px rgba(147,51,234,0.6), 0 0 60px rgba(147,51,234,0.25)';"
-      onmouseout="this.style.textShadow='0 0 8px rgba(147,51,234,0)';"
-    >
-      progsu / blog
-    </a>
+    <a href="/" class="wordmark">progsu / blog</a>
 
     <!-- Nav links -->
     <nav class="header-nav" aria-label="Site navigation">
       {NAV_LINKS.map((link) => (
-        <a
-          href={link.href}
-          class="nav-link"
-          style="text-shadow: 0 0 8px rgba(147,51,234,0);"
-          onmouseover="this.style.color='rgba(255,255,255,1)';this.style.textShadow='0 0 12px rgba(147,51,234,1), 0 0 30px rgba(147,51,234,0.6), 0 0 60px rgba(147,51,234,0.25)';"
-          onmouseout="this.style.color='rgba(255,255,255,0.40)';this.style.textShadow='0 0 8px rgba(147,51,234,0)';"
-        >
+        <a href={link.href} class="nav-link">
           {link.label.toLowerCase()}
         </a>
       ))}
@@ -33,9 +19,6 @@ import { NAV_LINKS } from "@/consts";
         id="search-trigger"
         class="nav-link search-btn"
         aria-label="Search"
-        style="background:none;border:none;cursor:pointer;text-shadow: 0 0 8px rgba(147,51,234,0);"
-        onmouseover="this.style.color='rgba(255,255,255,1)';this.style.textShadow='0 0 12px rgba(147,51,234,1), 0 0 30px rgba(147,51,234,0.6), 0 0 60px rgba(147,51,234,0.25)';"
-        onmouseout="this.style.color='rgba(255,255,255,0.40)';this.style.textShadow='0 0 8px rgba(147,51,234,0)';"
       >
         search /
       </button>
@@ -70,14 +53,18 @@ import { NAV_LINKS } from "@/consts";
   }
 
   .wordmark {
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-style: italic;
     font-weight: 700;
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.80);
     text-decoration: none;
     letter-spacing: -0.01em;
-    transition: color 0.3s, text-shadow 0.3s;
+    transition: color 0.25s;
+  }
+
+  .wordmark:hover {
+    color: #fff;
   }
 
   .header-nav {
@@ -89,13 +76,21 @@ import { NAV_LINKS } from "@/consts";
   .nav-link {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 0.75rem;
-    font-weight: 300;
+    font-weight: 400;
     color: rgba(255, 255, 255, 0.40);
     text-decoration: none;
     letter-spacing: 0.05em;
-    transition: color 0.3s, text-shadow 0.3s;
+    transition: color 0.25s;
     line-height: 1;
     white-space: nowrap;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .nav-link:hover {
+    color: #fff;
   }
 
   .search-btn {

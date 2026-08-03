@@ -180,13 +180,6 @@ declare module 'astro:content' {
   collection: "posts";
   data: InferEntrySchema<"posts">
 } & { render(): Render[".mdx"] };
-"member-spotlight-may-2026.mdx": {
-	id: "member-spotlight-may-2026.mdx";
-  slug: "member-spotlight-may-2026";
-  body: string;
-  collection: "posts";
-  data: InferEntrySchema<"posts">
-} & { render(): Render[".mdx"] };
 "mercedes-benz-networking-recap.mdx": {
 	id: "mercedes-benz-networking-recap.mdx";
   slug: "mercedes-benz-networking-recap";
